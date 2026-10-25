@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Fork Bank Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #netlify-badge { display: none !important; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; 
+            background-color: #ffffff; 
+            margin: 0; 
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Full-Screen Layout for both PC and Mobile */
+        .app-container { 
+            width: 100%; 
+            height: 100%; 
+            background: #ffffff; 
+            display: flex; 
+            flex-direction: column; 
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .screen { display: flex; flex-direction: column; height: 100%; overflow: hidden; box-sizing: border-box; }
+        .hidden { display: none !important; }
+
+        /* Login & Recovery Common Containers */
+        .auth-container { padding: 40px 25px; display: flex; flex-direction: column; justify-content: center; height: 100%; background: #ffffff; text-align: center; overflow-y: auto; max-width: 480px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .bank-logo { font-size: 26px; font-weight: 900; color: #064e3b; letter-spacing: -0.5px; margin-bottom: 5px; text-transform: uppercase; }
+        .auth-container p { color: #555; font-size: 13px; margin-bottom: 25px; line-height: 1.4; }
+        
+        .input-group { position: relative; width: 100%; margin-bottom: 15px; text-align: left; }
+        .input-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-field { width: 100%; padding: 14px 45px 14px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #f8fafc; text-align: left; letter-spacing: 0.5px; outline: none; }
+        .input-field:focus { border-color: #064e3b; background: #fff; }
+        .toggle-btn { position: absolute; right: 14px; top: 32px; background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px; font-weight: 600; padding: 4px; }
+
+        .auth-btn { width: 100%; padding: 14px; background: #064e3b; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 5px; }
+        .auth-btn:hover { background: #022c22; }
+        
+        .link-btn { background: none; border: none; color: #064e3b; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 15px; text-decoration: underline; }
+
+        /* Dashboard Header */
+        .app-header { 
+            background: linear-gradient(135deg, #064e3b, #022c22); 
+            padding: 20px; 
+            color: white; 
+            text-align: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .header-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .header-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.8); cursor: pointer; }
+        .header-brand { font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; flex-grow: 1; text-align: center; }
+        .header-subbrand { font-size: 10px; opacity: 0.85; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .header-greeting { font-size: 13px; font-weight: 600; opacity: 0.95; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .bell-icon { background: rgba(255,255,255,0.15); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; position: relative; }
+        .bell-badge { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+
+        /* Tab Content Body */
+        .app-body { 
+            padding: 20px; 
+            flex: 1; 
+            overflow-y: auto; 
+            background-color: #f4f6f9; 
+            display: none; 
+            flex-direction: column;
+            box-sizing: border-box;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .app-body.active { display: flex; }
+        
+        .section-heading { font-size: 12px; font-weight: bold; color: #475569; margin: 4px 0 10px 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        /* Account Cards */
+        .account-card { 
+            background: white; 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 10px; 
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.03); 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-left: 5px solid #064e3b;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .account-card:active { transform: scale(0.98); }
+        .account-info { width: 100%; }
+        .acct-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .acct-title { font-size: 13px; color: #334155; font-weight: 700; letter-spacing: 0.3px; }
+        .account-menu { font-size: 18px; color: #64748b; font-weight: bold; padding: 0 4px; line-height: 1; }
+        
+        .balance-row { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+        .balance-row span:last-child { font-weight: 700; color: #0f172a; font-size: 13px; }
+
+        /* Debit Card Container */
+        .debit-card-wrapper { perspective: 1000px; width: 100%; max-width: 400px; height: 210px; margin: 0 auto 16px auto; cursor: pointer; }
+        .debit-card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .debit-card.flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: white; background: linear-gradient(135deg, #064e3b, #022c22); }
+        .card-face.back { background: linear-gradient(135deg, #022c22, #042f2e); transform: rotateY(180deg); padding: 20px 0; }
+        .card-chip { width: 40px; height: 30px; background: linear-gradient(135deg, #d1d5db, #9ca3af); border-radius: 4px; margin-bottom: 10px; }
+        .card-number { font-size: 18px; font-family: monospace; letter-spacing: 2px; margin-bottom: 10px; }
+        .card-info-row { display: flex; justify-content: space-between; font-size: 11px; text-transform: uppercase; }
+        .card-holder { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+        .magnetic-stripe { width: 100%; height: 40px; background: #000000; margin-bottom: 15px; }
+        .signature-strip { background: #e2e8f0; height: 35px; width: 85%; margin: 0 auto; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; color: #000; font-family: monospace; font-weight: bold; border-radius: 4px; }
+
+        /* Success & Generic Overlay Modals */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .success-box { background: white; width: 85%; max-width: 360px; border-radius: 20px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: popUp 0.3s ease-out; }
+        @keyframes popUp { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .success-icon { width: 60px; height: 60px; background: #ecfdf5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px auto; }
+        .success-title { font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 8px; }
+        .success-desc { font-size: 13px; color: #475569; margin-bottom: 20px; line-height: 1.4; }
+
+        /* Notification Modal */
+        .notif-box { background: white; width: 90%; max-width: 380px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .notif-item { padding: 12px 0; border-bottom: 1px solid #e2e8f0; display: flex; flex-direction: column; text-align: left; }
+        .notif-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+        .notif-time { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+        /* Transaction History Items & Filters */
+        .filter-row { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .filter-chip { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; white-space: nowrap; }
+        .filter-chip.active { background: #064e3b; color: white; }
+        .tx-item { background: white; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        .tx-left { display: flex; flex-direction: column; text-align: left; }
+        .tx-title { font-size: 13px; font-weight: 700; color: #1e293b; }
+        .tx-date { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .tx-amount { font-size: 13px; font-weight: 700; }
+
+        /* Profile & Cards */
+        .profile-header { background: #064e3b; color: white; padding: 25px 20px; text-align: center; }
+        .avatar-container { position: relative; width: 80px; height: 80px; margin: 0 auto 12px auto; }
+        .avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; background: #e2e8f0; }
+        .avatar-upload-label { position: absolute; bottom: 0; right: 0; background: #0f172a; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; border: 2px solid white; }
+        .profile-name { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+        .profile-email-sub { font-size: 12px; opacity: 0.85; }
+        .profile-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0px 2px 8px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; text-align: left; }
+
+        /* Document row */
+        .doc-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .doc-title { font-size: 12px; font-weight: 600; color: #334155; }
+        .doc-btn { background: #f1f5f9; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; color: #064e3b; cursor: pointer; }
+
+        /* Bottom Navigation Bar (5 Items) */
+        .bottom-nav {
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 4px 12px 4px;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #64748b;
+            flex: 1;
+            padding: 0;
+        }
+        .nav-item.active { color: #064e3b; }
+        .nav-icon { width: 22px; height: 22px; margin-bottom: 3px; display: flex; align-items: center; justify-content: center; }
+        .nav-icon svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- STEP 1: LOGIN SCREEN -->
+        <div id="login-screen" class="screen auth-container">
+            <div class="bank-logo">Clear Fork Bank</div>
+            <p>Secure Client Portal Access</p>
+            
+            <div class="input-group">
+                <label class="input-label">Username</label>
+                <input type="text" id="username-input" class="input-field" placeholder="Username" value="Robert116">
+                <button type="button" class="toggle-btn" onclick="toggleVisibility('username-input', this)" style="top:42px;">Show</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="pass-input" class="input-field" placeholder="Password" value="Password1999@">
+                <button type="button" class="toggle-btn" onclick="toggleVisibility('pass-input', this)" style="top:42px;">Show</button>
+            </div>
+
+            <button class="auth-btn" onclick="handleLogin()">Sign In</button>
+            <button class="auth-btn" style="background: #0f172a; margin-top: 8px;" onclick="handleBiometricLogin()">👁️ Sign in with Face ID</button>
+            <button type="button" class="link-btn" onclick="showForgotScreen()">Forgot Password?</button>
+            <p id="error-text" style="color: #dc2626; font-size: 12px; margin-top: 12px;"></p>
+        </div>
+
+        <!-- FORGOT PASSWORD SCREEN -->
+        <div id="forgot-screen" class="screen auth-container hidden">
+            <div class="bank-logo">Password Recovery</div>
+            <p>Enter your registered username or account email to receive secure reset instructions.</p>
+            
+            <div class="input-group">
+                <label class="input-label">Username or Email</label>
+                <input type="text" id="recovery-input" class="input-field" placeholder="Username or Email" value="">
+            </div>
+
+            <button class="auth-btn" onclick="handleForgotSubmit()">Send Reset Code</button>
+            <button type="button" class="link-btn" onclick="showLoginScreen()">← Back to Sign In</button>
+            <p id="forgot-error-text" style="color: #dc2626; font-size: 12px; margin-top: 12px;"></p>
+        </div>
+
+        <!-- FORGOT PASSWORD VERIFY -->
+        <div id="forgot-verify-screen" class="screen auth-container hidden">
+            <div class="bank-logo">Security Verification</div>
+            <p>An encrypted 6-digit verification code has been sent to your primary mobile number ending in ••••-868.</p>
+            
+            <div class="input-group">
+                <label class="input-label">Verification Code</label>
+                <input type="text" id="code-input" class="input-field" maxlength="6" placeholder="Enter 6-Digit Code" value="">
+            </div>
+
+            <button class="auth-btn" onclick="handleCodeVerify()">Verify & Reset Password</button>
+            <button type="button" class="link-btn" onclick="showForgotScreen()">Back</button>
+            <p id="verify-error-text" style="color: #dc2626; font-size: 12px; margin-top: 12px;"></p>
+        </div>
+
+        <!-- STEP 2: LIVE OTP SELECTION & VERIFICATION SCREEN -->
+        <div id="otp-screen" class="screen auth-container hidden">
+            <div class="bank-logo">Two-Factor Authentication</div>
+            <p>Select where you want to receive your live one-time security OTP code:</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="auth-btn" style="margin:0; background: #0f172a;" onclick="sendOtpCode('phone')">📱 SMS to ••••-868</button>
+                <button class="auth-btn" style="margin:0; background: #0f172a;" onclick="sendOtpCode('email')">✉️ Email to ...@gmail.com</button>
+            </div>
+
+            <div class="input-group" id="otp-input-box" style="display:none;">
+                <label class="input-label">Enter 6-Digit OTP Code</label>
+                <input type="text" id="otp-code" class="input-field" maxlength="6" placeholder="e.g. 482910">
+                <button class="auth-btn" style="margin-top: 10px;" onclick="verifyOtpCode()">Confirm & Authorize Login</button>
+            </div>
+            <p id="otp-status-text" style="color: #059669; font-size: 13px; margin-top: 10px; font-weight: 600;"></p>
+        </div>
+
+        <!-- DASHBOARD FLOW WRAPPER -->
+        <div id="dashboard-wrapper" class="screen hidden" style="display:none; flex-direction:column; height:100%;">
+            
+            <!-- Header with Profile Avatar & Notification Bell -->
+            <div class="app-header">
+                <div class="header-top-row">
+                    <button class="bell-icon" onclick="toggleNotifications()">
+                        🔔
+                        <span class="bell-badge"></span>
+                    </button>
+                    <div class="header-brand">CLEAR FORK BANK</div>
+                    <img id="header-avatar-img" class="header-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' fill='%2394a3b8' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onclick="switchTab('profile')" alt="Profile">
+                </div>
+                <div class="header-subbrand">Private Client • Wealth • Security</div>
+                <div class="header-greeting" id="time-greeting">Good Morning, ROBERT</div>
+            </div>
+
+            <!-- SUCCESS OVERLAY MODAL -->
+            <div id="success-modal" class="modal-overlay hidden">
+                <div class="success-box">
+                    <div class="success-icon">✓</div>
+                    <div class="success-title" id="success-modal-heading">Transfer Completed!</div>
+                    <div class="success-desc" id="success-modal-text">Your transfer has been successfully processed and posted.</div>
+                    <button class="auth-btn" onclick="closeSuccessModal()">Done</button>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS MODAL -->
+            <div id="notification-modal" class="modal-overlay hidden" onclick="if(event.target === this) toggleNotifications()">
+                <div class="notif-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-weight:bold; font-size:15px; color:#0f172a;">Security & Alerts</span>
+                        <button onclick="toggleNotifications()" style="background:none; border:none; font-size:16px; font-weight:bold; cursor:pointer; color:#64748b;">✕</button>
+                    </div>
+                    <div class="notif-item">
+                        <span class="notif-title">🔒 New Device Login Detected</span>
+                        <span class="notif-text" style="font-size:12px; color:#475569;">Successful login from Portal session.</span>
+                        <span class="notif-time">Today, 3:00 PM</span>
+                    </div>
+                    <div class="notif-item">
+                        <span class="notif-title">✅ FDIC Insured Limit Updated</span>
+                        <span class="notif-text" style="font-size:12px; color:#475569;">Your portfolio is covered up to $2,500,000.00 across all tiers.</span>
+                        <span class="notif-time">Yesterday, 9:15 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOCUMENT VIEWER MODAL -->
+            <div id="document-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeDocumentModal()">
+                <div class="success-box" style="width: 90%; max-width: 400px; text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span class="success-title" id="doc-modal-title" style="margin:0;">Statement PDF</span>
+                        <button onclick="closeDocumentModal()" style="background:none; border:none; font-size:16px; font-weight:bold; cursor:pointer; color:#64748b;">✕</button>
+                    </div>
+                    <div id="doc-modal-body" style="font-size:12px; color:#334155; background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; font-family:monospace; margin-bottom:15px;">
+                        Loading statement document...
+                    </div>
+                    <button class="auth-btn" onclick="alert('Statement downloaded successfully as PDF.'); closeDocumentModal();">Download PDF</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: HOME / ACCOUNTS SCREEN -->
+            <div id="tab-home" class="app-body active">
+                <div class="section-heading">Accounts Portfolio</div>
+
+                <div class="account-card" onclick="alert('Checking Account ...4092\nRouting: 071000503\nStatus: Active - FDIC Insured')">
+                    <div class="account-info">
+                        <div class="acct-header-row">
+                            <div class="acct-title">CHECKING ...4092</div>
+                            <div class="account-menu">⋮</div>
+                        </div>
+                        <div class="balance-row">
+                            <span>Available Balance</span>
+                            <span id="checking-avail">$90,000.00</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Current Balance</span>
+                            <span id="checking-curr">$90,000.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-card" style="border-left-color: #059669;" onclick="alert('Rewards Checking ...7115\nAPY: 4.25%\nStatus: Active')">
+                    <div class="account-info">
+                        <div class="acct-header-row">
+                            <div class="acct-title">REWARDS CHECKING ...7115</div>
+                            <div class="account-menu">⋮</div>
+                        </div>
+                        <div class="balance-row">
+                            <span>Available Balance</span>
+                            <span id="rewards-avail">$13,888.00</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Current Balance</span>
+                            <span>$13,888.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-card" style="border-left-color: #2563eb;" onclick="alert('Primary Shares ...3304\nShare Capital: Active')">
+                    <div class="account-info">
+                        <div class="acct-header-row">
+                            <div class="acct-title">PRIMARY SHARES ...3304</div>
+                            <div class="account-menu">⋮</div>
+                        </div>
+                        <div class="balance-row">
+                            <span>Available Balance</span>
+                            <span id="shares-avail">$23,000.00</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Current Balance</span>
+                            <span>$23,000.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-card" style="border-left-color: #d97706;" onclick="alert('Savings Account ...8810\nHigh Yield Tier')">
+                    <div class="account-info">
+                        <div class="acct-header-row">
+                            <div class="acct-title">SAVINGS ...8810</div>
+                            <div class="account-menu">⋮</div>
+                        </div>
+                        <div class="balance-row">
+                            <span>Available Balance</span>
+                            <span id="savings-avail">$60,000.00</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Current Balance</span>
+                            <span>$60,000.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-card" style="border-left-color: #dc2626;" onclick="switchTab('cards')">
+                    <div class="account-info">
+                        <div class="acct-header-row">
+                            <div class="acct-title">CREDIT CARD ...9921</div>
+                            <div class="account-menu">⋮</div>
+                        </div>
+                        <div class="balance-row">
+                            <span>Available Credit</span>
+                            <span>$8,500.00</span>
+                        </div>
+                        <div class="balance-row">
+                            <span>Current Balance</span>
+                            <span>$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: MOBILE CHECK DEPOSIT -->
+            <div id="tab-deposit" class="app-body">
+                <div class="section-heading">Mobile Check Deposit</div>
+                <div class="profile-card">
+                    <div class="input-group">
+                        <label class="input-label">Deposit To Account</label>
+                        <select id="deposit-account" class="input-field">
+                            <option value="checking">Checking ...4092</option>
+                            <option value="rewards">Rewards Checking ...7115</option>
+                            <option value="shares">Primary Shares ...3304</option>
+                            <option value="savings">Savings ...8810</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Check Amount ($)</label>
+                        <input type="number" id="deposit-amount" class="input-field" placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Front of Check Image</label>
+                        <input type="file" accept="image/*" class="input-field" style="padding: 10px;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Back of Check (Signed)</label>
+                        <input type="file" accept="image/*" class="input-field" style="padding: 10px;">
+                    </div>
+                </div>
+                <button class="auth-btn" onclick="executeCheckDeposit()">Submit Check Deposit</button>
+                <p id="deposit-msg" style="font-size: 12px; margin-top: 10px; text-align: center; font-weight: 600;"></p>
+            </div>
+
+            <!-- TAB 3: LIVE FUNDS TRANSFER & ZELLE SCREEN -->
+            <div id="tab-transfer" class="app-body">
+                <div class="section-heading">Secure Fund Transfer & Zelle®️</div>
+                <div class="profile-card">
+                    <div class="input-group">
+                        <label class="input-label">Transfer From Account</label>
+                        <select id="source-account" class="input-field">
+                            <option value="checking">Checking ...4092 ($<span id="opt-checking">90,000.00</span>)</option>
+                            <option value="rewards">Rewards Checking ...7115 ($13,888.00)</option>
+                            <option value="shares">Primary Shares ...3304 ($23,000.00)</option>
+                            <option value="savings">Savings ...8810 ($60,000.00)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Transfer Type</label>
+                        <select id="transfer-type" class="input-field">
+                            <option value="Zelle®️ Instant Transfer">Zelle®️ Transfer</option>
+                            <option value="ACH Wire Transfer">Bank Wire (ACH)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Recipient Full Name</label>
+                        <input type="text" id="tx-recipient" class="input-field" placeholder="e.g. Marcus Vance">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Recipient Phone or Account #</label>
+                        <input type="text" id="tx-dest" class="input-field" placeholder="Phone, Email or Account Number">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Transfer Amount ($)</label>
+                        <input type="number" id="tx-amount" class="input-field" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="auth-btn" onclick="executeTransfer()">Authorize & Send Funds</button>
+                <p id="transfer-msg" style="font-size: 12px; margin-top: 10px; text-align: center; font-weight: 600;"></p>
+            </div>
+
+            <!-- TAB 4: CARDS SCREEN -->
+            <div id="tab-cards" class="app-body">
+                <div class="section-heading">Active Digital Debit Card (Tap to Flip)</div>
+                
+                <div class="debit-card-wrapper" onclick="toggleCardFlip()">
+                    <div class="debit-card" id="digital-debit-card">
+                        <div class="card-face">
+                            <div>
+                                <div style="font-size: 14px; font-weight: bold; letter-spacing: 1px;">CLEAR FORK BANK</div>
+                                <div style="font-size: 9px; opacity: 0.8;">WORLD ELITE DEBIT</div>
+                            </div>
+                            <div>
+                                <div class="card-chip"></div>
+                                <div class="card-number">4092 8810 2300 7115</div>
+                            </div>
+                            <div class="card-info-row">
+                                <div>
+                                    <div style="font-size: 8px; opacity: 0.7;">CARDHOLDER</div>
+                                    <div class="card-holder" id="card-holder-name">ROBERT MUELLER</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 8px; opacity: 0.7;">EXPIRES</div>
+                                    <div style="font-size: 12px; font-family: monospace;">09/28</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 8px; opacity: 0.7;">CVV</div>
+                                    <div style="font-size: 12px; font-family: monospace;">482</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-face back">
+                            <div class="magnetic-stripe"></div>
+                            <div style="padding: 0 20px;">
+                                <div style="font-size: 8px; margin-bottom: 2px; opacity: 0.8;">AUTHORIZED SIGNATURE - NOT VALID UNLESS SIGNED</div>
+                                <div class="signature-strip">482</div>
+                            </div>
+                            <div style="padding: 0 20px; font-size: 9px; opacity: 0.7; text-align: center;">
+                                Issued by Clear Fork Bank, N.A. Member FDIC. Use subject to cardholder agreement.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card" style="text-align: center; max-width: 400px; margin: 0 auto;">
+                    <button class="auth-btn" style="background: #0f172a;" onclick="toggleCardFlip()">Flip Card (Front / Back)</button>
+                    <button class="auth-btn" style="margin-top: 10px; background: #dc2626;" onclick="alert('Card locked securely.')">Lock Card Temporarily</button>
+                </div>
+            </div>
+
+            <!-- TAB 5: TRANSACTION HISTORY & SEARCH -->
+            <div id="tab-history" class="app-body">
+                <div class="section-heading">Account Activity & History</div>
+                
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <input type="text" id="tx-search" class="input-field" placeholder="🔍 Search transactions..." oninput="filterHistory()">
+                </div>
+
+                <div class="filter-row">
+                    <button class="filter-chip active" onclick="setFilter('all', this)">All</button>
+                    <button class="filter-chip" onclick="setFilter('credit', this)">Deposits</button>
+                    <button class="filter-chip" onclick="setFilter('debit', this)">Transfers / Debits</button>
+                </div>
+
+                <div id="history-list"></div>
+            </div>
+
+            <!-- TAB 6: PROFILE & STATEMENT CENTER -->
+            <div id="tab-profile" class="app-body" style="padding: 0;">
+                <div class="profile-header">
+                    <div class="avatar-container">
+                        <img id="profile-avatar" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='%2394a3b8' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Avatar">
+                        <label class="avatar-upload-label" title="Upload Photo">
+                            📷
+                            <input type="file" id="image-file-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                        </label>
+                    </div>
+                    <div class="profile-name" id="display-profile-name">Robert Mueller</div>
+                    <div class="profile-email-sub" id="display-profile-email">robertmueller507@gmail.com</div>
+                </div>
+
+                <div style="padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+                    <div class="section-heading">Personal Information</div>
+                    <div class="profile-card">
+                        <div class="input-group">
+                            <label class="input-label">Full Legal Name</label>
+                            <input type="text" id="p-name" class="input-field" value="Robert Mueller">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Date of Birth</label>
+                            <input type="text" id="p-dob" class="input-field" value="06/22/1970">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Residential Address</label>
+                            <input type="text" id="p-address" class="input-field" value="34 rosalyn court, sayre pa">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Phone Number</label>
+                            <input type="text" id="p-phone" class="input-field" value="+19092810868">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Email Address</label>
+                            <input type="text" id="p-email" class="input-field" value="robertmueller507@gmail.com">
+                        </div>
+                    </div>
+                    <button class="auth-btn" onclick="saveProfileData()">Save Profile Changes</button>
+
+                    <div class="section-heading" style="margin-top: 20px;">Document Center & Statements</div>
+                    <div class="profile-card">
+                        <div class="doc-row">
+                            <span class="doc-title">October 2026 Statement.pdf</span>
+                            <button class="doc-btn" onclick="viewStatement('October 2026')">View</button>
+                        </div>
+                        <div class="doc-row">
+                            <span class="doc-title">September 2026 Statement.pdf</span>
+                            <button class="doc-btn" onclick="viewStatement('September 2026')">View</button>
+                        </div>
+                        <div class="doc-row" style="border-bottom:none;">
+                            <span class="doc-title">Tax Form 1099-INT.pdf</span>
+                            <button class="doc-btn" onclick="viewStatement('Form 1099-INT')">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Bar (5 Items) -->
+            <div class="bottom-nav">
+                <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+                    <span class="nav-label">Home</span>
+                </button>
+                <button class="nav-item" id="nav-deposit" onclick="switchTab('deposit')">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></div>
+                    <span class="nav-label">Deposit</span>
+                </button>
+                <button class="nav-item" id="nav-transfer" onclick="switchTab('transfer')">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg></div>
+                    <span class="nav-label">Transfer</span>
+                </button>
+                <button class="nav-item" id="nav-cards" onclick="switchTab('cards')">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
+                    <span class="nav-label">Cards</span>
+                </button>
+                <button class="nav-item" id="nav-history" onclick="switchTab('history')">
+                    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></div>
+                    <span class="nav-label">History</span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let checkingBalance = parseFloat(localStorage.getItem('cf_checking')) || 90000.00;
+        let rewardsBalance = parseFloat(localStorage.getItem('cf_rewards')) || 13888.00;
+        let sharesBalance = parseFloat(localStorage.getItem('cf_shares')) || 23000.00;
+        let savingsBalance = parseFloat(localStorage.getItem('cf_savings')) || 60000.00;
+
+        let txHistory = JSON.parse(localStorage.getItem('cf_history')) || [
+            { title: "Initial Opening Deposit", date: "Oct 22, 2026", amount: "+$90,000.00", type: "credit", status: "Completed" }
+        ];
+        let currentFilterType = 'all';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUIBalances();
+            renderHistory();
+
+            const savedName = localStorage.getItem('cf_name') || "Robert Mueller";
+            const savedEmail = localStorage.getItem('cf_email') || "robertmueller507@gmail.com";
+            const savedAvatar = localStorage.getItem('cf_avatar');
+
+            document.getElementById('p-name').value = savedName;
+            document.getElementById('display-profile-name').innerText = savedName;
+            document.getElementById('card-holder-name').innerText = savedName.toUpperCase();
+            document.getElementById('p-email').value = savedEmail;
+            document.getElementById('display-profile-email').innerText = savedEmail;
+
+            if (savedAvatar) {
+                document.getElementById('profile-avatar').src = savedAvatar;
+                document.getElementById('header-avatar-img').src = savedAvatar;
+            }
+        });
+
+        function updateUIBalances() {
+            const fmt = (val) => "$" + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('checking-avail').innerText = fmt(checkingBalance);
+            document.getElementById('checking-curr').innerText = fmt(checkingBalance);
+            document.getElementById('rewards-avail').innerText = fmt(rewardsBalance);
+            document.getElementById('shares-avail').innerText = fmt(sharesBalance);
+            document.getElementById('savings-avail').innerText = fmt(savingsBalance);
+            document.getElementById('opt-checking').innerText = checkingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        }
+
+        function renderHistory() {
+            const listEl = document.getElementById('history-list');
+            const searchVal = document.getElementById('tx-search').value.toLowerCase();
+            listEl.innerHTML = "";
+
+            const filtered = txHistory.filter(tx => {
+                const matchesType = (currentFilterType === 'all' || tx.type === currentFilterType);
+                const matchesSearch = tx.title.toLowerCase().includes(searchVal) || tx.date.toLowerCase().includes(searchVal) || tx.amount.toLowerCase().includes(searchVal);
+                return matchesType && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div style="text-align:center; color:#64748b; font-size:12px; padding:20px;">No matching transactions found.</div>`;
+                return;
+            }
+
+            filtered.forEach(tx => {
+                const statusText = tx.status || "Completed";
+                listEl.innerHTML += `
+                    <div class="tx-item">
+                        <div class="tx-left">
+                            <span class="tx-title">${tx.title}</span>
+                            <span class="tx-date">${tx.date} • <span style="color: #059669; font-weight: 600;">${statusText}</span></span>
+                        </div>
+                        <span class="tx-amount" style="color: ${tx.type === 'credit' ? '#059669' : '#dc2626'};">${tx.amount}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function setFilter(type, btn) {
+            currentFilterType = type;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            renderHistory();
+        }
+
+        function toggleCardFlip() {
+            document.getElementById('digital-debit-card').classList.toggle('flipped');
+        }
+
+        function toggleNotifications() {
+            const modal = document.getElementById('notification-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function viewStatement(docName) {
+            document.getElementById('doc-modal-title').innerText = docName;
+            document.getElementById('doc-modal-body').innerText = `CLEAR FORK BANK - OFFICIAL STATEMENT\nDocument: ${docName}\nAccount Holder: Robert Mueller\nStatus: Verified & Encrypted\nBalance Summary: FDIC Insured Tier`;
+            document.getElementById('document-modal').classList.remove('hidden');
+        }
+
+        function closeDocumentModal() {
+            document.getElementById('document-modal').classList.add('hidden');
+        }
+
+        function executeCheckDeposit() {
+            const acc = document.getElementById('deposit-account').value;
+            const amountVal = parseFloat(document.getElementById('deposit-amount').value);
+            const msgEl = document.getElementById('deposit-msg');
+
+            if (isNaN(amountVal) || amountVal <= 0) {
+                msgEl.style.color = "#dc2626";
+                msgEl.innerText = "Please enter a valid deposit check amount.";
+                return;
+            }
+
+            if (acc === 'checking') checkingBalance += amountVal;
+            if (acc === 'rewards') rewardsBalance += amountVal;
+            if (acc === 'shares') sharesBalance += amountVal;
+            if (acc === 'savings') savingsBalance += amountVal;
+
+            localStorage.setItem('cf_checking', checkingBalance);
+            localStorage.setItem('cf_rewards', rewardsBalance);
+            localStorage.setItem('cf_shares', sharesBalance);
+            localStorage.setItem('cf_savings', savingsBalance);
+
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            txHistory.unshift({
+                title: `Mobile Check Deposit (${acc.toUpperCase()})`,
+                date: dateStr,
+                amount: `+$${amountVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                type: "credit",
+                status: "Completed"
+            });
+            localStorage.setItem('cf_history', JSON.stringify(txHistory));
+
+            updateUIBalances();
+            renderHistory();
+            document.getElementById('deposit-amount').value = "";
+            msgEl.innerText = "";
+
+            document.getElementById("success-modal-heading").innerText = "Check Deposited!";
+            document.getElementById("success-modal-text").innerText = `Your check deposit of $${amountVal.toLocaleString('en-US', { minimumFractionDigits: 2 })} has been accepted and credited successfully.`;
+            document.getElementById("success-modal").classList.remove("hidden");
+        }
+
+        function executeTransfer() {
+            const source = document.getElementById('source-account').value;
+            const recipient = document.getElementById('tx-recipient').value.trim();
+            const amountVal = parseFloat(document.getElementById('tx-amount').value);
+            const type = document.getElementById('transfer-type').value;
+            const msgEl = document.getElementById('transfer-msg');
+
+            if (!recipient || isNaN(amountVal) || amountVal <= 0) {
+                msgEl.style.color = "#dc2626";
+                msgEl.innerText = "Please enter a valid recipient name and amount.";
+                return;
+            }
+
+            let currentBal = checkingBalance;
+            if (source === 'rewards') currentBal = rewardsBalance;
+            if (source === 'shares') currentBal = sharesBalance;
+            if (source === 'savings') currentBal = savingsBalance;
+
+            if (amountVal > currentBal) {
+                msgEl.style.color = "#dc2626";
+                msgEl.innerText = "Insufficient funds in selected source account.";
+                return;
+            }
+
+            if (source === 'checking') checkingBalance -= amountVal;
+            if (source === 'rewards') rewardsBalance -= amountVal;
+            if (source === 'shares') sharesBalance -= amountVal;
+            if (source === 'savings') savingsBalance -= amountVal;
+
+            localStorage.setItem('cf_checking', checkingBalance);
+            localStorage.setItem('cf_rewards', rewardsBalance);
+            localStorage.setItem('cf_shares', sharesBalance);
+            localStorage.setItem('cf_savings', savingsBalance);
+
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            txHistory.unshift({
+                title: `${type} to ${recipient}`,
+                date: dateStr,
+                amount: `-$${amountVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                type: "debit",
+                status: "Completed"
+            });
+            localStorage.setItem('cf_history', JSON.stringify(txHistory));
+
+            updateUIBalances();
+            renderHistory();
+
+            document.getElementById('tx-recipient').value = "";
+            document.getElementById('tx-dest').value = "";
+            document.getElementById('tx-amount').value = "";
+            msgEl.innerText = "";
+
+            document.getElementById("success-modal-heading").innerText = "Transfer Completed!";
+            document.getElementById("success-modal-text").innerText = `Your ${type} of $${amountVal.toLocaleString('en-US', { minimumFractionDigits: 2 })} to recipient ${recipient} has been completed successfully. Account debited.`;
+            document.getElementById("success-modal").classList.remove("hidden");
+        }
+
+        function closeSuccessModal() {
+            document.getElementById("success-modal").classList.add("hidden");
+        }
+
+        function toggleVisibility(fieldId, btn) {
+            var input = document.getElementById(fieldId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "Hide";
+            } else {
+                input.type = "password";
+                btn.innerText = "Show";
+            }
+        }
+
+        function showForgotScreen() {
+            document.getElementById("login-screen").classList.add("hidden");
+            document.getElementById("otp-screen").classList.add("hidden");
+            document.getElementById("forgot-verify-screen").classList.add("hidden");
+            document.getElementById("forgot-screen").classList.remove("hidden");
+        }
+
+        function showLoginScreen() {
+            document.getElementById("forgot-screen").classList.add("hidden");
+            document.getElementById("otp-screen").classList.add("hidden");
+            document.getElementById("forgot-verify-screen").classList.add("hidden");
+            document.getElementById("login-screen").classList.remove("hidden");
+        }
+
+        function handleForgotSubmit() {
+            var val = document.getElementById("recovery-input").value.trim();
+            if (val === "Robert116" || val.includes("@")) {
+                document.getElementById("forgot-screen").classList.add("hidden");
+                document.getElementById("forgot-verify-screen").classList.remove("hidden");
+                document.getElementById("verify-error-text").innerText = "";
+            } else {
+                document.getElementById("forgot-error-text").innerText = "Account not found. Verify username/email.";
+            }
+        }
+
+        function handleCodeVerify() {
+            var code = document.getElementById("code-input").value.trim();
+            if (code.length === 6) {
+                alert("Identity verified successfully! You may now sign in with your credentials.");
+                showLoginScreen();
+            } else {
+                document.getElementById("verify-error-text").innerText = "Please enter the valid 6-digit code.";
+            }
+        }
+
+        function handleLogin() {
+            var username = document.getElementById("username-input").value;
+            var pass = document.getElementById("pass-input").value;
+
+            if (username === "Robert116" && pass === "Password1999@") {
+                document.getElementById("login-screen").classList.add("hidden");
+                document.getElementById("otp-screen").classList.remove("hidden");
+            } else {
+                document.getElementById("error-text").innerText = "Authentication failed. Verify credentials.";
+            }
+        }
+
+        function handleBiometricLogin() {
+            document.getElementById("login-screen").classList.add("hidden");
+            var wrapper = document.getElementById("dashboard-wrapper");
+            wrapper.classList.remove("hidden");
+            wrapper.style.display = "flex";
+            updateGreeting();
+            setInterval(updateGreeting, 60000);
+        }
+
+        function sendOtpCode(method) {
+            const statusEl = document.getElementById("otp-status-text");
+            statusEl.innerText = `Sending live 6-digit OTP via ${method === 'phone' ? 'SMS to ••••-868' : 'Email to robertmueller507@gmail.com'}...`;
+            document.getElementById("otp-input-box").style.display = "block";
+            
+            setTimeout(() => {
+                statusEl.innerText = `OTP sent successfully! (Hint for testing: enter any 6 digits like 849201)`;
+            }, 1500);
+        }
+
+        function verifyOtpCode() {
+            const code = document.getElementById("otp-code").value.trim();
+            if (code.length === 6) {
+                document.getElementById("otp-screen").classList.add("hidden");
+                var wrapper = document.getElementById("dashboard-wrapper");
+                wrapper.classList.remove("hidden");
+                wrapper.style.display = "flex";
+                updateGreeting();
+                setInterval(updateGreeting, 60000);
+            } else {
+                alert("Please enter a valid 6-digit OTP code.");
+            }
+        }
+
+        function updateGreeting() {
+            var now = new Date();
+            var hours = now.getHours();
+            var greetingWord = "Good Evening";
+            
+            if (hours >= 5 && hours < 12) {
+                greetingWord = "Good Morning";
+            } else if (hours >= 12 && hours < 17) {
+                greetingWord = "Good Afternoon";
+            }
+            
+            var greetingEl = document.getElementById("time-greeting");
+            if (greetingEl) {
+                greetingEl.innerText = greetingWord + ", ROBERT";
+            }
+        }
+
+        function switchTab(tabName) {
+            ['home', 'deposit', 'transfer', 'cards', 'history', 'profile'].forEach(t => {
+                const tabEl = document.getElementById(`tab-${t}`);
+                const navEl = document.getElementById(`nav-${t}`);
+                if (tabEl) tabEl.classList.remove("active");
+                if (navEl) navEl.classList.remove("active");
+            });
+
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            const activeNav = document.getElementById(`nav-${tabName}`);
+            if (activeTab) activeTab.classList.add("active");
+            if (activeNav) activeNav.classList.add("active");
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    document.getElementById('profile-avatar').src = base64Img;
+                    document.getElementById('header-avatar-img').src = base64Img;
+                    localStorage.setItem('cf_avatar', base64Img);
+                    alert("Profile picture updated and synced to header successfully!");
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProfileData() {
+            const name = document.getElementById('p-name').value;
+            const dob = document.getElementById('p-dob').value;
+            const address = document.getElementById('p-address').value;
+            const phone = document.getElementById('p-phone').value;
+            const email = document.getElementById('p-email').value;
+
+            localStorage.setItem('cf_name', name);
+            localStorage.setItem('cf_dob', dob);
+            localStorage.setItem('cf_address', address);
+            localStorage.setItem('cf_phone', phone);
+            localStorage.setItem('cf_email', email);
+
+            document.getElementById('display-profile-name').innerText = name;
+            document.getElementById('card-holder-name').innerText = name.toUpperCase();
+            document.getElementById('display-profile-email').innerText = email;
+
+            alert("Profile details saved and secured successfully!");
+        }
+    </script>
+
+</body>
+</html>
